@@ -9,6 +9,11 @@ const userSchema = mongoose.Schema({
         required: true,
         trim: true
     },
+    photoURL: {
+        type: String,
+        required: true,
+        default: 'assets/images/avatars/profile.jpg',
+    },
     email: {
         type: String,
         required: true,
@@ -62,6 +67,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
     if (!isPasswordMatch) {
         throw new Error({ error: 'Invalid login credentials' })
     }
+
     return user
 }
 
