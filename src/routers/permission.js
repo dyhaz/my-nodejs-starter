@@ -32,7 +32,7 @@ router.post('/permissions/getByName', async(req, res) => {
         }
         res.send({ permission })
 	} catch(error) {
-		res.status(500).send('Internal Error')
+		res.status(500).send({error: 'Internal Error'})
 	}
 })
 

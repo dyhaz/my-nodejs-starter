@@ -33,7 +33,7 @@ router.post('/roles/getByName', async(req, res) => {
         }
         res.send({ role })
 	} catch(error) {
-	    res.status(500).send(error)
+	    res.status(500).send({error: 'Internal Error'})
 	}
 })
 
@@ -47,7 +47,7 @@ router.post('/roles/deleteRole', async(req, res) => {
         await role.delete()
         res.send({ role })
     } catch(error) {
-        res.status(500).send('Internal Error')
+        res.status(500).send({error: 'Internal Error'})
     }
 })
 
@@ -67,7 +67,7 @@ router.post('/roles/addPermission', async(req, res) => {
         await role.save()
         res.status(201).send({role})
     } catch(error) {
-        res.status(500).send('Internal Error')
+        res.status(500).send({error: 'Internal Error'})
     }
 })
 
@@ -86,7 +86,7 @@ router.post('/roles/removePermission', async(req, res) => {
         await role.save()
         res.status(204).send({role})
     } catch(error) {
-        res.status(500).send('Internal Error')
+        res.status(500).send({error: 'Internal Error'})
     }
 })
 
