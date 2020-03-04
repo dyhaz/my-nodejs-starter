@@ -11,7 +11,7 @@ router.post('/roles', async (req, res) => {
 	    await role.save()
 	    res.status(201).send({role})
 	}  catch (error) {
-	    res.status(400).send(error)
+	    res.status(400).send({error: error.message})
 	}
 })
 
@@ -20,7 +20,7 @@ router.get('/roles', async (req, res) => {
         const roles = await Role.getAll()
         res.status(200).send({roles})
     }  catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({error: error.message})
     }
 })
 

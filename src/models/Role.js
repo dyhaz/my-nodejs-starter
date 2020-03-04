@@ -1,7 +1,7 @@
-const mongoose = require('mongoose')
-const validator = require('validator')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const roleSchema = mongoose.Schema({
     name: {
@@ -12,7 +12,7 @@ const roleSchema = mongoose.Schema({
     },
     description: String,
     permissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permission' }]
-})
+});
 
 roleSchema.pre('save', async function (next) {
     const role = this
@@ -21,23 +21,23 @@ roleSchema.pre('save', async function (next) {
 
 roleSchema.statics.findByName = async (name) => {
     // Search for a user by email and password.
-    const role = await Role.findOne({ name} )
+    const role = await Role.findOne({ name });
     if (!role) {
-        throw new Error({ error: 'Invalid role' })
+        throw new Error('Invalid role')
     }
 
     return role
-}
+};
 
 roleSchema.statics.getAll = async () =>  {
-    const roles = await Role.find({})
+    const roles = await Role.find({});
     if (!roles) {
-        throw new Error({error: 'No data available'})
+        throw new Error('No data available')
     }
 
     return roles
-}
+};
 
-const Role = mongoose.model('Role', roleSchema)
+const Role = mongoose.model('Role', roleSchema);
 
-module.exports = Role
+module.exports = Role;

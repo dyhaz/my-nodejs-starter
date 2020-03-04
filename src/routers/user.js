@@ -1,61 +1,94 @@
-const express = require('express')
-const User = require('../models/User')
+const express = require('express');
+const User = require('../models/User');
+const UserDetail = require('../models/UserDetail');
 
-const router = express.Router()
-const auth = require('../middleware/auth')
+const router = express.Router();
+const auth = require('../middleware/auth');
 
 router.post('/users', async (req, res) => {
 	try {
-	    const user = new User(req.body)
-	    await user.save()
-	    const token = await user.generateAuthToken()
+	    const user = new User(req.body);
+	    await user.save();
+	    const token = await user.generateAuthToken();
 	    res.status(201).send({user, token})
 	}  catch (error) {
-	    res.status(400).send(error)
+	    res.status(400).send({error: error.message})
 	}
-})
+});
 
 router.post('/users/login', async(req, res) => {
 	try {
-	    const { email, password } = req.body
-        let user = await User.findByCredentials(email, password)
+	    const { email, password } = req.body;
+        let user = await User.findByCredentials(email, password);
         if (!user) {
             return res.status(401).send({error: 'Login failed! Check authentication credentials'})
         }
-        const token = await user.generateAuthToken()
+        const token = await user.generateAuthToken();
         res.send({ user, token })
 	} catch(error) {
-	    res.status(400).send(error)
+	    res.status(400).send({error: error.message})
 	}
-})
+});
 
 router.get('/users/me', auth, async(req, res) => {
     // View logged in user profile
     res.send(req.user)
-})
+});
+
+router.post('/users/detail', async (req, res) => {
+    try {
+        const user = new UserDetail(req.body);
+        await user.save();
+        if (user.userName === '' || !user.userName) {
+            const userName = await user.generateUserName();
+        }
+        res.status(201).send({user})
+    }  catch (error) {
+        res.status(400).send({error: error.message})
+    }
+});
+
+router.get('/users/detail', auth, async(req, res) => {
+    // View logged in user profile
+    try {
+        let userDetail;
+        if (req.query.username) {
+            userDetail = await UserDetail.findByUserName(req.query.username);
+        } else {
+            userDetail = await UserDetail.findByUser(req.user.id);
+        }
+        if (!userDetail) {
+            return res.status(400).send({error: 'Invalid user'})
+        }
+
+        res.send(userDetail)
+    } catch (error) {
+        res.status(500).send({error: error.message})
+    }
+});
 
 router.post('/users/me/logout', auth, async (req, res) => {
     // Log user out of the application
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
             return token.token != req.token
-        })
-        await req.user.save()
+        });
+        await req.user.save();
         res.send()
     } catch (error) {
-        res.status(500).send(error)
+        res.status(500).send({error: error.message})
     }
-})
+});
 
 router.post('/users/me/logoutall', auth, async(req, res) => {
     // Log user out of all devices
     try {
-        req.user.tokens.splice(0, req.user.tokens.length)
-        await req.user.save()
+        req.user.tokens.splice(0, req.user.tokens.length);
+        await req.user.save();
         res.send()
     } catch (error) {
-        res.status(500).send(error)
+        res.status(500).send({error: error.message})
     }
-})
+});
 
-module.exports = router
+module.exports = router;
