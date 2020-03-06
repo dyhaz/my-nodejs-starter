@@ -21,7 +21,6 @@ const userDetailSchema = mongoose.Schema({
     },
     userName: {
         type: String,
-        required: true,
         trim: true,
         unique: true,
         lowercase: true
@@ -72,7 +71,7 @@ userDetailSchema.statics.findByUserName = async (userName) => {
 };
 
 userDetailSchema.statics.findByUser = async (id) => {
-    const user = await UserDetail.find({ user: id });
+    const user = await UserDetail.findOne({ user: id });
     if (!user) {
         throw new Error('Invalid user')
     }

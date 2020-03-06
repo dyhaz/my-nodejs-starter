@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const UserDetail = require('./models/UserDetail');
 
 const userSchema = mongoose.Schema({
     name: {
@@ -61,13 +62,34 @@ userSchema.statics.findByCredentials = async (email, password) => {
     // Search for a user by email and password.
     const user = await User.findOne({ email });
     if (!user) {
-        throw new Error('Invalid login credentials')
+        const userDetail = await UserDetail.findByUserName(email);
+        if (!userDetail || !userDetail.user || userDetail.user.email !== email) {
+            throw new Error('Invalid login credentials')
+        }
     }
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
         throw new Error('Invalid login credentials')
     }
 
+    return user
+};
+
+userSchema.statics.findByEmail = async (email) => {
+    // Search for a user by email and password.
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error('Invalid user')
+    }
+    return user
+};
+
+userSchema.statics.updateByEmail = async (email, update) => {
+    // Search for a user by email and password.
+    const user = await User.findOneAndUpdate({ email }, update,{new: true});
+    if (!user) {
+        throw new Error('Invalid user')
+    }
     return user
 };
 

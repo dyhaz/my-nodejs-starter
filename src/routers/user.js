@@ -35,14 +35,15 @@ router.get('/users/me', auth, async(req, res) => {
     res.send(req.user)
 });
 
-router.post('/users/detail', async (req, res) => {
+router.post('/users/me', auth, async(req, res) => {
     try {
-        const user = new UserDetail(req.body);
-        await user.save();
-        if (user.userName === '' || !user.userName) {
-            const userName = await user.generateUserName();
+        const user = new User(req.body);
+        if (user.email === req.user.email) {
+            let userNew = await User.updateByEmail(req.body.email.trim(), user);
+            res.status(204).send({user: userNew, message: 'Updated successfully!'})
+        } else {
+            res.status(500);
         }
-        res.status(201).send({user})
     }  catch (error) {
         res.status(400).send({error: error.message})
     }
@@ -64,6 +65,24 @@ router.get('/users/detail', auth, async(req, res) => {
         res.send(userDetail)
     } catch (error) {
         res.status(500).send({error: error.message})
+    }
+});
+
+router.post('/users/detail', async (req, res) => {
+    try {
+        const userDetail = new UserDetail(req.body);
+        await userDetail.save();
+        if (req.body.email) {
+            userDetail.user = await User.findByEmail(req.body.email.trim());
+            await userDetail.save()
+        }
+
+        if (userDetail.userName === '' || !userDetail.userName) {
+            const userName = await userDetail.generateUserName();
+        }
+        res.status(201).send(userDetail);
+    }  catch (error) {
+        res.status(400).send({error: error.message})
     }
 });
 
