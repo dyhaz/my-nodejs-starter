@@ -25,6 +25,11 @@ const userDetailSchema = mongoose.Schema({
         unique: true,
         lowercase: true
     },
+    email: {
+        type: String,
+        trim: true,
+        lowercase: true
+    },
     avatar: {
         type: String,
         required: true,
@@ -72,6 +77,16 @@ userDetailSchema.statics.findByUserName = async (userName) => {
 
 userDetailSchema.statics.findByUser = async (id) => {
     const user = await UserDetail.findOne({ user: id });
+    if (!user) {
+        throw new Error('Invalid user')
+    }
+
+    return user
+};
+
+userDetailSchema.statics.updateByUser = async (id, update) => {
+    // Search for a user by email and password.
+    const user = await UserDetail.findOneAndUpdate({ user: id }, update,{new: true});
     if (!user) {
         throw new Error('Invalid user')
     }

@@ -57,6 +57,7 @@ router.get('/users/detail', auth, async(req, res) => {
             userDetail = await UserDetail.findByUserName(req.query.username);
         } else {
             userDetail = await UserDetail.findByUser(req.user.id);
+            userDetail.email = req.user.email
         }
         if (!userDetail) {
             return res.status(400).send({error: 'Invalid user'})
@@ -68,19 +69,26 @@ router.get('/users/detail', auth, async(req, res) => {
     }
 });
 
-router.post('/users/detail', async (req, res) => {
+router.post('/users/detail', auth, async (req, res) => {
     try {
-        const userDetail = new UserDetail(req.body);
-        await userDetail.save();
-        if (req.body.email) {
-            userDetail.user = await User.findByEmail(req.body.email.trim());
-            await userDetail.save()
-        }
+        let userDetail;
+        let userDetailOld = UserDetail.findByUser(req.user.id);
+        if (!userDetailOld) {
+            userDetail = new UserDetail(req.body);
+            await userDetail.save();
+            if (req.body.email) {
+                userDetail.user = await User.findByEmail(req.body.email.trim());
+                await userDetail.save()
+            }
 
-        if (userDetail.userName === '' || !userDetail.userName) {
-            const userName = await userDetail.generateUserName();
+            if (userDetail.userName === '' || !userDetail.userName) {
+                const userName = await userDetail.generateUserName();
+            }
+            res.status(201).send(userDetail);
+        } else {
+            userDetail = await UserDetail.updateByUser(req.user.id, new UserDetail(req.body));
+            res.status(200).send(userDetail);
         }
-        res.status(201).send(userDetail);
     }  catch (error) {
         res.status(400).send({error: error.message})
     }
