@@ -1,6 +1,7 @@
 const express = require('express');
 const Role = require('../models/Role');
 const Permission = require('../models/Permission');
+const UserDetail = require('../models/UserDetail');
 
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -37,13 +38,19 @@ router.post('/roles/getByName', async(req, res) => {
 	}
 });
 
-router.post('/roles/deleteRole', async(req, res) => {
+router.post('/roles/deleteRole', auth, async(req, res) => {
     try {
         const { name } = req.body;
         const role = await Role.findByName(name);
         if (!role) {
             return res.status(500).send({error: 'Role not found'})
         }
+
+        const userDetail = UserDetail.findByUser(req.user.id);
+        if (!userDetail || userDetail.userName !== 'admin') {
+            return res.status(401).send({error: 'Not authorized to access this resource'})
+        }
+
         await role.delete();
         res.send({ role })
     } catch(error) {
@@ -51,7 +58,7 @@ router.post('/roles/deleteRole', async(req, res) => {
     }
 });
 
-router.post('/roles/addPermission', async(req, res) => {
+router.post('/roles/addPermission', auth, async(req, res) => {
     try {
         const {roleName, permissionName} = req.body;
         const role = await Role.findByName(roleName);
@@ -63,6 +70,12 @@ router.post('/roles/addPermission', async(req, res) => {
         if (!permission) {
             return res.status(500).send({error: 'Permission not found'})
         }
+
+        const userDetail = UserDetail.findByUser(req.user.id);
+        if (!userDetail || userDetail.userName !== 'admin') {
+            return res.status(401).send({error: 'Not authorized to access this resource'})
+        }
+
         role.permissions.push(permission);
         await role.save();
         res.status(201).send({role})
