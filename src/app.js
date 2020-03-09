@@ -4,6 +4,7 @@ const express = require('express');
 const userRouter = require('./routers/user');
 const permissionRouter = require('./routers/permission');
 const roleRouter = require('./routers/role');
+const dashboardRouter = require('./routers/dashboard');
 const port = process.env.PORT;
 require('./db/db');
 
@@ -26,6 +27,7 @@ app.use(function(req, res, next) {
 app.use(userRouter);
 app.use(permissionRouter);
 app.use(roleRouter);
+app.use(dashboardRouter);
 
 app.listen(port, () => {
 	console.log(`Server running port ${port}`)
